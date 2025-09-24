@@ -32,15 +32,18 @@ from .config_hope_jr import HopeJrHandConfig
 
 logger = logging.getLogger(__name__)
 
+# * (ryanpennings): Update inversions to match my build.
 RIGHT_HAND_INVERSIONS = [
-    "thumb_mcp",
+    # "thumb_mcp",
     "thumb_dip",
     "index_ulnar_flexor",
+    "index_pip_dip",
     "middle_ulnar_flexor",
+    "middle_pip_dip",
     "ring_ulnar_flexor",
-    "ring_pip_dip",
+    # "ring_pip_dip",
     "pinky_ulnar_flexor",
-    "pinky_pip_dip",
+    # "pinky_pip_dip",
 ]
 
 LEFT_HAND_INVERSIONS = [
