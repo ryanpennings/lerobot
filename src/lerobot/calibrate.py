@@ -47,6 +47,7 @@ from lerobot.teleoperators import (  # noqa: F401
     Teleoperator,
     TeleoperatorConfig,
     homunculus,
+    hopejr_camtracker,
     koch_leader,
     make_teleoperator_from_config,
     so100_leader,

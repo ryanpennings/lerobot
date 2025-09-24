@@ -64,6 +64,12 @@ def make_teleoperator_from_config(config: TeleoperatorConfig) -> Teleoperator:
     elif config.type == "bi_so100_leader":
         from .bi_so100_leader import BiSO100Leader
 
+    # TODO : add hopejr_camtracker (done)
+    elif config.type == "hopejr_camtracker_hand":
+        from .hopejr_camtracker import HopejrCamtrackHand
+
+        return HopejrCamtrackHand(config)
+
         return BiSO100Leader(config)
     elif config.type == "reachy2_teleoperator":
         from .reachy2_teleoperator import Reachy2Teleoperator

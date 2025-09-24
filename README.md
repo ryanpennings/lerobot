@@ -18,6 +18,21 @@
 
 </div>
 
+<h2 align="center">WIP Notes for this Branch</h2>
+  <p align="center">
+  This branch is a work inprogress to use Mediapipe for handtracking to control the HopeJR robot.
+  <br/>
+
+  <li>Math is wrong - very jittery.</li>
+  <li>Only hand works.</li>
+  <li>Because hopejr teleop has to run in 2 separate shells, haven't implemented a way to share the camera feed (either zeromq or shared memory are best options atm.</li>
+  <li>You need to use a different package of mediapipe that installs numpy > 2 otherwise it will downgrade. <a href="https://pypi.org/project/mediapipe-numpy2/">(https://pypi.org/project/mediapipe-numpy2/)</a></li>
+  <li>haven't added dependencies to pyproject etc</li>
+  <li>Mediapipe hasn't released the hollistic model so need to run 2 models, 1 for hand, 1 for arms.</li>
+  <br/>
+  Also have stopped development on this, for reference only.
+  </p>
+
 <h2 align="center">
     <p><a href="https://huggingface.co/docs/lerobot/hope_jr">
         Build Your Own HopeJR Robot!</a></p>
