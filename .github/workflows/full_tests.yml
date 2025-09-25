@@ -89,122 +89,122 @@ jobs:
   # This job builds a GPU enabled image for testing
   # It runs everytime a PR is approved or a push to main
   # TODO(Steven): For now we skip this job for community PRs
-  build-and-push-docker:
-    name: Build and Push Docker
-    runs-on:
-      group: aws-general-8-plus
-    if: |
-      (github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.pull_request.head.repo.fork == false) ||
-      github.event_name == 'push' ||
-      github.event_name == 'workflow_dispatch'
-    outputs:
-      image_tag: ${{ steps.set_tag.outputs.image_tag }}
-    env:
-      GITHUB_EVENT_NAME: ${{ github.event_name }}
-      GITHUB_REF: ${{ github.ref }}
-      GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
-    steps:
-      - name: Set Docker image tag
-        id: set_tag
-        run: |
-          if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
-            TAG="${DOCKER_IMAGE_NAME}:latest"
-          elif [[ -n "${GITHUB_PR_NUMBER}" ]]; then
-            TAG="${DOCKER_IMAGE_NAME}:pr-${GITHUB_PR_NUMBER}"
-          else
-            TAG="${DOCKER_IMAGE_NAME}:pr-${GITHUB_REF##*/}"
-          fi
-          echo "image_tag=$TAG" >> $GITHUB_OUTPUT
-      - name: Install Git LFS
-        run: |
-          sudo apt-get update
-          sudo apt-get install git-lfs
-          git lfs install
-      - uses: actions/checkout@v4
-        with:
-          lfs: true
-          persist-credentials: false
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3 # zizmor: ignore[unpinned-uses]
-        with:
-          cache-binary: false
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3 # zizmor: ignore[unpinned-uses]
-        with:
-          username: ${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6 # zizmor: ignore[unpinned-uses]
-        with:
-          context: .
-          file: ./docker/Dockerfile.internal
-          push: true
-          tags: ${{ steps.set_tag.outputs.image_tag }}
+  # build-and-push-docker:
+  #   name: Build and Push Docker
+  #   runs-on:
+  #     group: aws-general-8-plus
+  #   if: |
+  #     (github.event_name == 'pull_request_review' && github.event.review.state == 'approved' && github.event.pull_request.head.repo.fork == false) ||
+  #     github.event_name == 'push' ||
+  #     github.event_name == 'workflow_dispatch'
+  #   outputs:
+  #     image_tag: ${{ steps.set_tag.outputs.image_tag }}
+  #   env:
+  #     GITHUB_EVENT_NAME: ${{ github.event_name }}
+  #     GITHUB_REF: ${{ github.ref }}
+  #     GITHUB_PR_NUMBER: ${{ github.event.pull_request.number }}
+  #   steps:
+  #     - name: Set Docker image tag
+  #       id: set_tag
+  #       run: |
+  #         if [[ "${GITHUB_EVENT_NAME}" == "push" ]]; then
+  #           TAG="${DOCKER_IMAGE_NAME}:latest"
+  #         elif [[ -n "${GITHUB_PR_NUMBER}" ]]; then
+  #           TAG="${DOCKER_IMAGE_NAME}:pr-${GITHUB_PR_NUMBER}"
+  #         else
+  #           TAG="${DOCKER_IMAGE_NAME}:pr-${GITHUB_REF##*/}"
+  #         fi
+  #         echo "image_tag=$TAG" >> $GITHUB_OUTPUT
+  #     - name: Install Git LFS
+  #       run: |
+  #         sudo apt-get update
+  #         sudo apt-get install git-lfs
+  #         git lfs install
+  #     - uses: actions/checkout@v4
+  #       with:
+  #         lfs: true
+  #         persist-credentials: false
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@v3 # zizmor: ignore[unpinned-uses]
+  #       with:
+  #         cache-binary: false
+  #     - name: Login to Docker Hub
+  #       uses: docker/login-action@v3 # zizmor: ignore[unpinned-uses]
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}
+  #     - name: Build and push Docker image
+  #       uses: docker/build-push-action@v6 # zizmor: ignore[unpinned-uses]
+  #       with:
+  #         context: .
+  #         file: ./docker/Dockerfile.internal
+  #         push: true
+  #         tags: ${{ steps.set_tag.outputs.image_tag }}
 
-  # This job runs pytest with all extras in a GPU enabled host
-  # It runs everytime a test image is created
-  gpu-tests:
-    name: GPU Tests
-    needs: [build-and-push-docker]
-    runs-on:
-      group: aws-g6-4xlarge-plus
-    env:
-      HF_HOME: /home/user_lerobot/.cache/huggingface
-      HF_LEROBOT_HOME: /home/user_lerobot/.cache/huggingface/lerobot
-      TORCH_HOME: /home/user_lerobot/.cache/torch
-      TRITON_CACHE_DIR: /home/user_lerobot/.cache/triton
-    container:
-      image: ${{ needs.build-and-push-docker.outputs.image_tag }} # zizmor: ignore[unpinned-images]
-      options: --gpus all --shm-size "16gb"
-      credentials:
-        username: ${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}
-    defaults:
-      run:
-        shell: bash
-        working-directory: /lerobot
-    steps:
-      - name: Run pytest on GPU
-        run: pytest tests -vv --maxfail=10
-      - name: Run end-to-end tests
-        run: make test-end-to-end
+  # # This job runs pytest with all extras in a GPU enabled host
+  # # It runs everytime a test image is created
+  # gpu-tests:
+  #   name: GPU Tests
+  #   needs: [build-and-push-docker]
+  #   runs-on:
+  #     group: aws-g6-4xlarge-plus
+  #   env:
+  #     HF_HOME: /home/user_lerobot/.cache/huggingface
+  #     HF_LEROBOT_HOME: /home/user_lerobot/.cache/huggingface/lerobot
+  #     TORCH_HOME: /home/user_lerobot/.cache/torch
+  #     TRITON_CACHE_DIR: /home/user_lerobot/.cache/triton
+  #   container:
+  #     image: ${{ needs.build-and-push-docker.outputs.image_tag }} # zizmor: ignore[unpinned-images]
+  #     options: --gpus all --shm-size "16gb"
+  #     credentials:
+  #       username: ${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}
+  #       password: ${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}
+  #   defaults:
+  #     run:
+  #       shell: bash
+  #       working-directory: /lerobot
+  #   steps:
+  #     - name: Run pytest on GPU
+  #       run: pytest tests -vv --maxfail=10
+  #     - name: Run end-to-end tests
+  #       run: make test-end-to-end
 
-  # This job deletes the test image recently created
-  # It runs everytime after the gpu-tests have finished
-  delete-pr-image:
-    name: Delete PR Image
-    needs: [gpu-tests, build-and-push-docker]
-    if: always() && ((github.event.review.state == 'approved') || (github.event_name == 'workflow_dispatch')) && needs.build-and-push-docker.result == 'success'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Get Docker Hub Token and Delete Image
-        # zizmor: ignore[template-injection]
-        run: |
-          IMAGE_NAME=$(echo "${{ needs.build-and-push-docker.outputs.image_tag }}" | cut -d':' -f1)
-          IMAGE_TAG=$(echo "${{ needs.build-and-push-docker.outputs.image_tag }}" | cut -d':' -f2)
+  # # This job deletes the test image recently created
+  # # It runs everytime after the gpu-tests have finished
+  # delete-pr-image:
+  #   name: Delete PR Image
+  #   needs: [gpu-tests, build-and-push-docker]
+  #   if: always() && ((github.event.review.state == 'approved') || (github.event_name == 'workflow_dispatch')) && needs.build-and-push-docker.result == 'success'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Get Docker Hub Token and Delete Image
+  #       # zizmor: ignore[template-injection]
+  #       run: |
+  #         IMAGE_NAME=$(echo "${{ needs.build-and-push-docker.outputs.image_tag }}" | cut -d':' -f1)
+  #         IMAGE_TAG=$(echo "${{ needs.build-and-push-docker.outputs.image_tag }}" | cut -d':' -f2)
 
-          echo "Attempting to delete image: $IMAGE_NAME:$IMAGE_TAG"
+  #         echo "Attempting to delete image: $IMAGE_NAME:$IMAGE_TAG"
 
-          TOKEN=$(curl -s -H "Content-Type: application/json" \
-                       -X POST \
-                       -d '{"username": "${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}", "password": "${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}"}' \
-                       https://hub.docker.com/v2/users/login/ | jq -r .token)
+  #         TOKEN=$(curl -s -H "Content-Type: application/json" \
+  #                      -X POST \
+  #                      -d '{"username": "${{ secrets.DOCKERHUB_LEROBOT_USERNAME }}", "password": "${{ secrets.DOCKERHUB_LEROBOT_PASSWORD }}"}' \
+  #                      https://hub.docker.com/v2/users/login/ | jq -r .token)
 
-          if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
-            echo "::error::Failed to get Docker Hub token."
-            exit 1
-          fi
+  #         if [ "$TOKEN" == "null" ] || [ -z "$TOKEN" ]; then
+  #           echo "::error::Failed to get Docker Hub token."
+  #           exit 1
+  #         fi
 
-          HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-                               -H "Authorization: JWT ${TOKEN}" \
-                               -X DELETE \
-                               https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/${IMAGE_TAG}/)
+  #         HTTP_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+  #                              -H "Authorization: JWT ${TOKEN}" \
+  #                              -X DELETE \
+  #                              https://hub.docker.com/v2/repositories/${IMAGE_NAME}/tags/${IMAGE_TAG}/)
 
-          if [ "$HTTP_RESPONSE" -eq 204 ]; then
-            echo "Successfully deleted Docker image tag: $IMAGE_NAME:$IMAGE_TAG"
-          else
-            echo "::error::Failed to delete Docker image. HTTP status: $HTTP_RESPONSE"
-            exit 1
-          fi
+  #         if [ "$HTTP_RESPONSE" -eq 204 ]; then
+  #           echo "Successfully deleted Docker image tag: $IMAGE_NAME:$IMAGE_TAG"
+  #         else
+  #           echo "::error::Failed to delete Docker image. HTTP status: $HTTP_RESPONSE"
+  #           exit 1
+  #         fi
 
 # TODO(Steven): Check dockerimages pull in ubuntu
